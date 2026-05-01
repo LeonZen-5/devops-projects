@@ -29,3 +29,30 @@
         dest: "{{ project_dir }}"
         version: main
         force: yes
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: devops-projects
+        build:
+          path: "{{ project_dir }}"
+        source: build
+        state: present
+        force_source: yes
+
+    - name: Run container
+      community.docker.docker_container:
+        name: devops-projects
+        image: devops-projects
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "5000:5000"
+
+    - name: Show running containers
+      ansible.builtin.command: docker ps
+      register: docker_ps
+      changed_when: false
+
+    - name: Print docker ps output
+      ansible.builtin.debug:
+        var: docker_ps.stdout_lines
