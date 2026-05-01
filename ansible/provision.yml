@@ -1,0 +1,58 @@
+---
+- name: Provision GCP VM for Flask app
+  hosts: localhost
+  gather_facts: no
+  connection: local
+
+  vars:
+    gcp_project: YOUR_PROJECT_ID
+    gcp_cred_file: /home/devcristian/gcp-service-account.json
+    gcp_zone: us-central1-a
+    instance_name: flask-app-vm
+    machine_type: e2-small
+    image_family: ubuntu-2204-lts
+    image_project: ubuntu-os-cloud
+
+  tasks:
+    - name: Create firewall rule for port 5000
+      google.cloud.gcp_compute_firewall:
+        name: allow-flask-5000
+        allowed:
+          - ip_protocol: tcp
+            ports:
+              - "5000"
+        source_ranges:
+          - "0.0.0.0/0"
+        target_tags:
+          - flask-app
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_cred_file }}"
+        state: present
+
+    - name: Create GCP VM instance
+      google.cloud.gcp_compute_instance:
+        name: "{{ instance_name }}"
+        machine_type: "{{ machine_type }}"
+        zone: "{{ gcp_zone }}"
+        disks:
+          - auto_delete: true
+            boot: true
+            initialize_params:
+              source_image: "projects/{{ image_project }}/global/images/family/{{ image_family }}"
+        network_interfaces:
+          - access_configs:
+              - name: External NAT
+                type: ONE_TO_ONE_NAT
+        tags:
+          items:
+            - flask-app
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_cred_file }}"
+        state: present
+      register: vm_instance
+
+    - name: Show external IP of new VM
+      ansible.builtin.debug:
+        msg: "VM created. External IP: {{ vm_instance.networkInterfaces[0].accessConfigs[0].natIP }}"
