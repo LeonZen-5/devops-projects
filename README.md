@@ -1,2 +1,11 @@
 # devops-projects
-DevOps final project: Flask REST API deployed via Docker, CI, Ansible, and GCP
+
+DevOps final.
+
+## Branches
+- `main` — integrated code
+- `app` — Flask REST API
+- `docker` — Dockerfile + Makefile
+- `ci` — GitHub Actions + tests
+- `ansible` — deploy playbook
+- `gcp` — GCP provisioning playbook
