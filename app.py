@@ -23,5 +23,13 @@ def create_task():
     return jsonify(task), 201
 
 
+@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    if task_id not in tasks:
+        return jsonify({"error": "not found"}), 404
+    del tasks[task_id]
+    return "", 204
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
