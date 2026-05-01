@@ -1,6 +1,4 @@
-# devops-projects
-
-DevOps final.
+# DevOps final
 
 ## Branches
 - `main` — integrated code
